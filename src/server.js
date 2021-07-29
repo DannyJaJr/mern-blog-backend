@@ -1,5 +1,5 @@
 const express = require("express");
-
+const {MongoClient} = require("mongodb")
 
 const app = express();
 app.use(express.json());
@@ -7,19 +7,24 @@ app.use(express.urlencoded({
     extended: true
 }));
 
-const articlesInfo = {
-    'learn-react': {
-        comments: []
-    },
+app.get('/api/articles/:name', async (req, res) => {
+   try {
+        
+   const articleName = req.params.name;
+   const client = await MongoClient.connect('mongodb://localhost:27017', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    const db = client.db("myblog");
+    const articleInfo = await db.collection('articles').findOne({name: articleName})
+    res.status(200).json(articleInfo)
+    client.close();
+   } catch(error) {
+       res.status(500).json({message: "No Connection", error })
 
-    'learn-node': {
-        comments: [],
-    },
+   }
+});
 
-    'my-thoughts-on-react': {
-        comments: [],
-    },
-}
 
 
 
